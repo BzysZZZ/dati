@@ -71,4 +71,10 @@ public interface QuestionService {
      * @return 结果数组 [总题数, 已答题数, 正确题数]
      */
     int[] getUserAnswerStats(String userId);
+    
+    /**
+     * 重置用户答题记录
+     * @param userId 用户ID
+     */
+    void resetUserAnswers(String userId);
 }

@@ -115,8 +115,10 @@
             <strong>正确题数:</strong> ${correctCount}
         </div>
         <div>
+            <a href="/question/continue" class="btn">继续刷题</a>
+            <a href="/question/restart" class="btn">重新刷题</a>
+            <a href="/question/random100" class="btn">随机100题</a>
             <a href="/question/import" class="btn btn-import">导入题目</a>
-            <a href="/question/stats" class="btn btn-stats">查看统计</a>
         </div>
     </div>
     

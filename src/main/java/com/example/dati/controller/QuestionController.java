@@ -75,6 +75,9 @@ public class QuestionController {
             }
         }
         
+        // 获取所有题目用于导航
+        model.addAttribute("questions", userAnswers);
+        
         // 解析选项
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -87,6 +90,86 @@ public class QuestionController {
         model.addAttribute("question", question);
         
         return "question/detail";
+    }
+    
+    /**
+     * 继续刷题 - 跳转到第一道未答的题目
+     * @param session 会话
+     * @return 重定向地址
+     */
+    @GetMapping("/continue")
+    public String continueQuiz(HttpSession session) {
+        String userId = session.getId();
+        
+        // 获取所有题目及用户答题记录
+        List<Question> questions = questionService.getUserAnswers(userId);
+        
+        // 查找第一道未答的题目
+        for (Question question : questions) {
+            if (question.getUserAnswer() == null || question.getUserAnswer().isEmpty()) {
+                return "redirect:/question/detail/" + question.getId();
+            }
+        }
+        
+        // 如果所有题目都已答，默认从第一题开始
+        if (!questions.isEmpty()) {
+            return "redirect:/question/detail/" + questions.get(0).getId();
+        }
+        
+        // 如果没有题目，返回列表页
+        return "redirect:/question/list";
+    }
+    
+    /**
+     * 重新刷题 - 重置用户答题记录
+     * @param session 会话
+     * @return 重定向地址
+     */
+    @GetMapping("/restart")
+    public String restartQuiz(HttpSession session) {
+        String userId = session.getId();
+        
+        // 重置用户答题记录
+        questionService.resetUserAnswers(userId);
+        
+        // 获取所有题目
+        List<Question> questions = questionService.getUserAnswers(userId);
+        
+        // 从第一题开始
+        if (!questions.isEmpty()) {
+            return "redirect:/question/detail/" + questions.get(0).getId();
+        }
+        
+        // 如果没有题目，返回列表页
+        return "redirect:/question/list";
+    }
+    
+    /**
+     * 随机100题 - 随机选择100道题
+     * @param session 会话
+     * @return 重定向地址
+     */
+    @GetMapping("/random100")
+    public String random100Quiz(HttpSession session) {
+        String userId = session.getId();
+        
+        // 获取所有题目
+        List<Question> questions = questionService.getUserAnswers(userId);
+        
+        // 如果题目数量少于100，直接从第一题开始
+        if (questions.size() <= 1) {
+            if (!questions.isEmpty()) {
+                return "redirect:/question/detail/" + questions.get(0).getId();
+            }
+            return "redirect:/question/list";
+        }
+        
+        // 重置用户答题记录
+        questionService.resetUserAnswers(userId);
+        
+        // 随机选择一个题目开始
+        int randomIndex = (int) (Math.random() * questions.size());
+        return "redirect:/question/detail/" + questions.get(randomIndex).getId();
     }
 
     /**

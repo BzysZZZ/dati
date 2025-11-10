@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <!DOCTYPE html>
 <html>
 <head>
@@ -10,7 +11,7 @@
             font-family: 'Microsoft YaHei', Arial, sans-serif;
             line-height: 1.6;
             color: #333;
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             background-color: #f5f5f5;
@@ -20,11 +21,68 @@
             text-align: center;
             margin-bottom: 30px;
         }
+        .content-wrapper {
+            display: flex;
+            gap: 20px;
+        }
         .question-container {
             background-color: white;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             padding: 30px;
+            flex: 1;
+        }
+        .question-nav {
+            width: 200px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            padding: 20px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        .nav-title {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #1a5276;
+        }
+        .nav-dots {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+        .nav-dot {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #ecf0f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #7f8c8d;
+            border: 2px solid transparent;
+        }
+        .nav-dot:hover {
+            background-color: #3498db;
+            color: white;
+        }
+        .nav-dot.current {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+        }
+        .nav-dot.correct {
+            background-color: #27ae60;
+            color: white;
+        }
+        .nav-dot.incorrect {
+            background-color: #e74c3c;
+            color: white;
         }
         .question-header {
             margin-bottom: 20px;
@@ -118,7 +176,8 @@
 <body>
     <h1>题目详情</h1>
     
-    <div class="question-container">
+    <div class="content-wrapper">
+        <div class="question-container">
         <div class="question-header">
             <div class="question-title">${question.id}. ${question.content}</div>
             <div class="question-info">
@@ -138,7 +197,13 @@
                         <input type="radio" name="userAnswer" id="option-${option.key}" 
                                value="${option.key}" ${question.userAnswer == option.key ? 'checked' : ''}>
                         <label for="option-${option.key}" class="option-label">
-                            <strong>${option.key}.</strong> ${option.value}
+                            <c:set var="optionText" value="${option.value}" />
+                            <c:if test="${fn:startsWith(optionText, option.key) and fn:endsWith(fn:substring(optionText, 0, 2), '.')}">
+                                ${fn:substring(optionText, 2, fn:length(optionText))}
+                            </c:if>
+                            <c:if test="${not (fn:startsWith(optionText, option.key) and fn:endsWith(fn:substring(optionText, 0, 2), '.'))}">
+                                ${optionText}
+                            </c:if>
                         </label>
                     </div>
                 </c:forEach>
@@ -153,6 +218,21 @@
         <div id="result" class="result">
             <div class="result-header" id="resultHeader"></div>
             <div class="answer-info" id="answerInfo"></div>
+        </div>
+        </div>
+        
+        <div class="question-nav">
+            <div class="nav-title">题目导航</div>
+            <div class="nav-dots">
+                <c:forEach items="${questions}" var="q">
+                    <a href="/question/detail/${q.id}" 
+                       class="nav-dot 
+                              ${q.id == question.id ? 'current' : ''} 
+                              ${not empty q.userAnswer ? (q.isCorrect ? 'correct' : 'incorrect') : ''}">
+                        ${q.id}
+                    </a>
+                </c:forEach>
+            </div>
         </div>
     </div>
     
@@ -209,10 +289,7 @@
                             radio.disabled = true;
                         });
                         
-                        // 延迟刷新页面，显示结果
-                        setTimeout(() => {
-                            window.location.href = '/question/list';
-                        }, 2000);
+                        // 不需要自动重定向，让用户可以查看结果并自行决定下一步操作
                     } else {
                         alert('提交失败: ' + result.message);
                     }

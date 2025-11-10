@@ -2,6 +2,7 @@ D:\javaCode\dati\src\main\java\com\example\dati\DatiApplication.java
 D:\javaCode\dati\src\main\java\com\example\dati\controller\IndexController.java
 D:\javaCode\dati\src\main\java\com\example\dati\mapper\QuestionMapper.java
 D:\javaCode\dati\src\main\java\com\example\dati\service\impl\QuestionServiceImpl.java
+D:\javaCode\dati\src\main\java\com\example\dati\utils\DatabaseUpdater.java
 D:\javaCode\dati\src\main\java\com\example\dati\pojo\Question.java
 D:\javaCode\dati\src\main\java\com\example\dati\service\QuestionService.java
 D:\javaCode\dati\src\main\java\com\example\dati\config\WebConfig.java

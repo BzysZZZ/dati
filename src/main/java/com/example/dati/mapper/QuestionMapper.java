@@ -69,4 +69,11 @@ public interface QuestionMapper {
      * @return 答题记录列表
      */
     List<Question> getUserAnswers(@Param("userId") String userId);
+    
+    /**
+     * 删除用户答题记录
+     * @param userId 用户ID
+     * @return 删除结果
+     */
+    int deleteUserAnswers(@Param("userId") String userId);
 }

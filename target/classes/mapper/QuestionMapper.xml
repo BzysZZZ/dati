@@ -57,5 +57,11 @@
         SELECT q.*, ua.user_answer, ua.is_correct
         FROM questions q
         LEFT JOIN user_answers ua ON q.id = ua.question_id AND ua.user_id = #{userId}
+        ORDER BY q.id ASC
     </select>
+    
+    <!-- 删除用户答题记录 -->
+    <delete id="deleteUserAnswers" parameterType="String">
+        DELETE FROM user_answers WHERE user_id = #{userId}
+    </delete>
 </mapper>

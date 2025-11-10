@@ -89,4 +89,9 @@ public class QuestionServiceImpl implements QuestionService {
 
         return new int[]{totalCount, answeredCount, correctCount};
     }
+    
+    @Override
+    public void resetUserAnswers(String userId) {
+        questionMapper.deleteUserAnswers(userId);
+    }
 }
