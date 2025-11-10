@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.dati.mapper.QuestionMapper">
+    <!-- 添加题目 -->
+    <insert id="addQuestion" parameterType="Question">
+        INSERT INTO questions (content, options, answer, type, clause)
+        VALUES (#{content}, #{options}, #{answer}, #{type}, #{clause})
+    </insert>
+
+    <!-- 批量添加题目 -->
+    <insert id="batchAddQuestions" parameterType="List">
+        INSERT INTO questions (content, options, answer, type, clause)
+        VALUES
+        <foreach collection="questions" item="question" separator=",">
+            (#{question.content}, #{question.options}, #{question.answer}, #{question.type}, #{question.clause})
+        </foreach>
+    </insert>
+
+    <!-- 根据ID查询题目 -->
+    <select id="getQuestionById" parameterType="Integer" resultType="Question">
+        SELECT * FROM questions WHERE id = #{id}
+    </select>
+
+    <!-- 查询所有题目 -->
+    <select id="getAllQuestions" resultType="Question">
+        SELECT * FROM questions
+    </select>
+
+    <!-- 更新题目 -->
+    <update id="updateQuestion" parameterType="Question">
+        UPDATE questions
+        SET content = #{content},
+            options = #{options},
+            answer = #{answer},
+            type = #{type},
+            clause = #{clause}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除题目 -->
+    <delete id="deleteQuestion" parameterType="Integer">
+        DELETE FROM questions WHERE id = #{id}
+    </delete>
+
+    <!-- 保存用户答题记录 -->
+    <insert id="saveUserAnswer">
+        INSERT INTO user_answers (user_id, question_id, user_answer, is_correct, answer_time)
+        VALUES (#{userId}, #{questionId}, #{userAnswer}, #{isCorrect}, NOW())
+        ON DUPLICATE KEY UPDATE
+        user_answer = #{userAnswer},
+        is_correct = #{isCorrect},
+        answer_time = NOW()
+    </insert>
+
+    <!-- 查询用户答题记录 -->
+    <select id="getUserAnswers" parameterType="String" resultType="Question">
+        SELECT q.*, ua.user_answer, ua.is_correct
+        FROM questions q
+        LEFT JOIN user_answers ua ON q.id = ua.question_id AND ua.user_id = #{userId}
+    </select>
+</mapper>

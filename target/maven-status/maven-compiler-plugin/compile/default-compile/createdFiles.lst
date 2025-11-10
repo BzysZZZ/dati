@@ -1,0 +1,9 @@
+com\example\dati\config\WebConfig.class
+com\example\dati\pojo\Question.class
+com\example\dati\service\QuestionService.class
+com\example\dati\service\impl\QuestionServiceImpl.class
+com\example\dati\DatiApplication.class
+com\example\dati\mapper\QuestionMapper.class
+com\example\dati\utils\DocumentParser.class
+com\example\dati\controller\IndexController.class
+com\example\dati\controller\QuestionController.class
