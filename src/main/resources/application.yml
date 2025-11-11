@@ -24,6 +24,6 @@ mybatis:
 logging:
   level:
     root: INFO
-    com.example.dati: DEBUG
-    org.springframework.web: INFO
-    org.apache.ibatis: INFO
+    'com.example.dati': DEBUG
+    'org.springframework.web': INFO
+    'org.apache.ibatis': INFO

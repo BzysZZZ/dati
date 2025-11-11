@@ -81,7 +81,7 @@ public class QuestionController {
         // 解析选项
         try {
             ObjectMapper mapper = new ObjectMapper();
-            Map<String, String> options = mapper.readValue(question.getOptions(), Map.class);
+            Map<String, String> options = mapper.readValue(question.getOptions(), new com.fasterxml.jackson.core.type.TypeReference<Map<String, String>>() {});
             model.addAttribute("options", options);
         } catch (Exception e) {
             e.printStackTrace();

@@ -209,10 +209,17 @@
                 </c:forEach>
             </div>
             
-            <c:if test="${empty question.userAnswer}">
-                <button type="submit" class="btn">提交答案</button>
-            </c:if>
-            <a href="/question/list" class="btn btn-back">返回列表</a>
+            <!-- 导航按钮组 -->
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <a id="prevQuestion" href="#" class="btn">上一题</a>
+                
+                <c:if test="${empty question.userAnswer}">
+                    <button type="submit" class="btn">提交答案</button>
+                </c:if>
+                
+                <a id="nextQuestion" href="#" class="btn">下一题</a>
+                <a href="/question/list" class="btn btn-back">返回列表</a>
+            </div>
         </form>
         
         <div id="result" class="result">
@@ -301,13 +308,14 @@
         
         // 如果已有答案，显示结果
         <c:if test="${not empty question.userAnswer}">
+            <script>
             const resultElement = document.getElementById('result');
             const resultHeader = document.getElementById('resultHeader');
             const answerInfo = document.getElementById('answerInfo');
             
             resultElement.style.display = 'block';
             
-            if (${question.isCorrect}) {
+            if (<c:out value="${question.isCorrect}" />) {
                 resultElement.className = 'result correct';
                 resultHeader.textContent = '回答正确！';
             } else {
@@ -315,13 +323,55 @@
                 resultHeader.textContent = '回答错误！';
             }
             
-            answerInfo.textContent = '您的答案: ${question.userAnswer} | 正确答案: ${question.answer}';
+            answerInfo.textContent = '您的答案: <c:out value="${question.userAnswer}" /> | 正确答案: <c:out value="${question.answer}" />';
             
             // 禁用选项
             document.querySelectorAll('input[type="radio"]').forEach(radio => {
                 radio.disabled = true;
             });
+            </script>
         </c:if>
+        
+        // 上一题和下一题功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取所有题目的ID
+            const questionIds = [];
+            <c:forEach items="${questions}" var="q">
+                questionIds.push(${q.id});
+            </c:forEach>
+            
+            // 找到当前题目的索引
+            const currentQuestionId = ${question.id};
+            const currentIndex = questionIds.indexOf(currentQuestionId);
+            
+            // 设置上一题和下一题链接
+            const prevBtn = document.getElementById('prevQuestion');
+            const nextBtn = document.getElementById('nextQuestion');
+            
+            // 如果没有上一题，禁用上一题按钮
+            if (currentIndex <= 0) {
+                prevBtn.href = '#';
+                prevBtn.style.backgroundColor = '#bdc3c7';
+                prevBtn.style.cursor = 'not-allowed';
+                prevBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                });
+            } else {
+                prevBtn.href = '/question/detail/' + questionIds[currentIndex - 1];
+            }
+            
+            // 如果没有下一题，禁用下一题按钮
+            if (currentIndex >= questionIds.length - 1) {
+                nextBtn.href = '#';
+                nextBtn.style.backgroundColor = '#bdc3c7';
+                nextBtn.style.cursor = 'not-allowed';
+                nextBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                });
+            } else {
+                nextBtn.href = '/question/detail/' + questionIds[currentIndex + 1];
+            }
+        });
     </script>
 </body>
 </html>
