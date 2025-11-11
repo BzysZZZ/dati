@@ -148,13 +148,6 @@ public class DocumentParser {
                 String questionContent = questionMatcher.group(2).trim();
                 question.setContent(questionContent);
 
-                // 判断题目类型
-                if (questionContent.contains("正确") && questionContent.contains("错误")) {
-                    question.setType("judge"); // 判断题
-                } else {
-                    question.setType("single"); // 单选题
-                }
-
                 // 查找答案
                 int startIndex = questionMatcher.end();
                 Matcher answerMatcher = answerPattern.matcher(content.substring(startIndex));
@@ -170,8 +163,27 @@ public class DocumentParser {
                     question.setClause(clause);
                 }
 
-                // 解析选项 - 优化处理方式
-                Map<String, String> optionsMap = parseOptions(content.substring(questionMatcher.start(), startIndex), optionPattern);
+                // 判断题目类型并设置选项
+                Map<String, String> optionsMap = new HashMap<>();
+                if (questionContent.contains("正确") && questionContent.contains("错误")) {
+                    question.setType("judge"); // 判断题
+                    // 为判断题设置默认的正确和错误选项
+                    optionsMap.put("A", "正确");
+                    optionsMap.put("B", "错误");
+                    // 处理答案，确保与选项匹配
+                    String answer = question.getAnswer();
+                    if (answer != null) {
+                        if (answer.contains("√") || answer.contains("正确")) {
+                            question.setAnswer("A");
+                        } else if (answer.contains("×") || answer.contains("错误")) {
+                            question.setAnswer("B");
+                        }
+                    }
+                } else {
+                    question.setType("single"); // 单选题
+                    // 解析选项 - 优化处理方式
+                    optionsMap = parseOptions(content.substring(questionMatcher.start(), startIndex), optionPattern);
+                }
                 
                 // 将选项转换为JSON格式
                 question.setOptions(convertOptionsToJson(optionsMap));

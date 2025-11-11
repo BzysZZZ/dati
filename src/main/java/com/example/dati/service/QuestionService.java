@@ -77,4 +77,9 @@ public interface QuestionService {
      * @param userId 用户ID
      */
     void resetUserAnswers(String userId);
+    
+    /**
+     * 更新判断题格式，确保所有判断题都有标准的选项和答案格式
+     */
+    void updateJudgeQuestions();
 }

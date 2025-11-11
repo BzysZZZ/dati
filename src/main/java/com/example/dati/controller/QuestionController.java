@@ -315,6 +315,22 @@ public class QuestionController {
      * @param session 会话
      * @return 视图名
      */
+    /**
+     * 更新判断题格式
+     * @param model 模型
+     * @return 视图名
+     */
+    @GetMapping("/update-judge")
+    public String updateJudgeQuestions(Model model) {
+        try {
+            questionService.updateJudgeQuestions();
+            model.addAttribute("message", "判断题格式更新成功！");
+        } catch (Exception e) {
+            model.addAttribute("error", "判断题格式更新失败: " + e.getMessage());
+        }
+        return "question/update-result";
+    }
+    
     @GetMapping("/stats")
     public String statistics(Model model, HttpSession session) {
         String userId = session.getId();

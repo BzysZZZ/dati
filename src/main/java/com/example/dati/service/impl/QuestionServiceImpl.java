@@ -94,4 +94,39 @@ public class QuestionServiceImpl implements QuestionService {
     public void resetUserAnswers(String userId) {
         questionMapper.deleteUserAnswers(userId);
     }
+    
+    @Override
+    public void updateJudgeQuestions() {
+        // 获取所有题目
+        List<Question> allQuestions = questionMapper.getAllQuestions();
+        
+        for (Question question : allQuestions) {
+            // 判断是否为判断题（包含"正确"和"错误"关键词）
+            if (question.getType().equals("judge") || 
+                (question.getContent() != null && 
+                 question.getContent().contains("正确") && 
+                 question.getContent().contains("错误"))) {
+                
+                // 设置为判断题类型
+                question.setType("judge");
+                
+                // 更新选项，设置为标准的A/B选项
+                String optionsJson = "{\"A\":\"正确\",\"B\":\"错误\"}";
+                question.setOptions(optionsJson);
+                
+                // 更新答案，将√/×转换为A/B
+                String answer = question.getAnswer();
+                if (answer != null) {
+                    if (answer.contains("√") || answer.contains("正确")) {
+                        question.setAnswer("A");
+                    } else if (answer.contains("×") || answer.contains("错误")) {
+                        question.setAnswer("B");
+                    }
+                }
+                
+                // 更新题目
+                questionMapper.updateQuestion(question);
+            }
+        }
+    }
 }
