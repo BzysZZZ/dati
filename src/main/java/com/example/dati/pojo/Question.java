@@ -10,7 +10,7 @@ public class Question implements Serializable {
     private String content;     // 题目内容
     private String options;     // 选项，以JSON格式存储
     private String answer;      // 正确答案
-    private String type;        // 题目类型：single（单选题）或judge（判断题）
+    private String type;        // 题目类型：single（单选题）、judge（判断题）或multiple（多选题）
     private String clause;      // 对应条款
     private String userId;      // 用户ID，用于区分不同用户的答题记录
     private String userAnswer;  // 用户答案

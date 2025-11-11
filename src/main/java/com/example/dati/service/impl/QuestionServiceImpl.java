@@ -58,10 +58,24 @@ public class QuestionServiceImpl implements QuestionService {
         }
 
         // 判断答案是否正确
-        boolean isCorrect = question.getAnswer().equals(userAnswer);
+        boolean isCorrect = false;
+        String correctAnswer = question.getAnswer();
+        
+        // 处理用户答案，移除空格和逗号，确保是大写字母
+        String normalizedUserAnswer = userAnswer != null ? userAnswer.replaceAll("[\\s,]", "").toUpperCase() : "";
+        
+        // 根据题目类型判断答案
+        if ("multiple".equals(question.getType())) {
+            // 多选题：答案必须完全匹配，不考虑顺序
+            // 这里假设答案已经标准化为连续的大写字母，如ABCD
+            isCorrect = correctAnswer.equals(normalizedUserAnswer);
+        } else {
+            // 单选题和判断题：直接比较
+            isCorrect = correctAnswer.equals(normalizedUserAnswer);
+        }
 
         // 保存用户答题记录
-        questionMapper.saveUserAnswer(userId, questionId, userAnswer, isCorrect);
+        questionMapper.saveUserAnswer(userId, questionId, normalizedUserAnswer, isCorrect);
 
         return isCorrect;
     }

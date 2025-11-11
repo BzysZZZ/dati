@@ -179,6 +179,17 @@ public class DocumentParser {
                             question.setAnswer("B");
                         }
                     }
+                } else if (questionContent.contains("多选题") || questionContent.contains("多选")) {
+                    question.setType("multiple"); // 多选题
+                    // 解析选项
+                    optionsMap = parseOptions(content.substring(questionMatcher.start(), startIndex), optionPattern);
+                    // 多选题答案可能是多个选项，例如 "ABCD" 或 "A,B,C,D"
+                    String answer = question.getAnswer();
+                    if (answer != null) {
+                        // 标准化答案格式，移除空格和逗号，确保是大写字母
+                        answer = answer.replaceAll("[\s,]", "").toUpperCase();
+                        question.setAnswer(answer);
+                    }
                 } else {
                     question.setType("single"); // 单选题
                     // 解析选项 - 优化处理方式

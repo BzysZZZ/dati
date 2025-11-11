@@ -181,7 +181,7 @@
         <div class="question-header">
             <div class="question-title">${question.id}. ${question.content}</div>
             <div class="question-info">
-                <span>${question.type == 'judge' ? '判断题' : '单选题'}</span>
+                <span>${question.type == 'judge' ? '判断题' : (question.type == 'multiple' ? '多选题' : '单选题')}</span>
                 <c:if test="${not empty question.clause}">
                     | 对应条款: ${question.clause}
                 </c:if>
@@ -193,9 +193,17 @@
             
             <div class="options">
                 <c:forEach items="${options}" var="option" varStatus="status">
-                    <div class="option ${question.userAnswer == option.key ? 'selected' : ''}">
-                        <input type="radio" name="userAnswer" id="option-${option.key}" 
-                               value="${option.key}" ${question.userAnswer == option.key ? 'checked' : ''}>
+                    <div class="option ${question.type == 'multiple' ? (fn:contains(question.userAnswer, option.key) ? 'selected' : '') : (question.userAnswer == option.key ? 'selected' : '')}">
+                        <c:choose>
+                            <c:when test="${question.type == 'multiple'}">
+                                <input type="checkbox" name="userAnswers" id="option-${option.key}" 
+                                       value="${option.key}" ${fn:contains(question.userAnswer, option.key) ? 'checked' : ''}>
+                            </c:when>
+                            <c:otherwise>
+                                <input type="radio" name="userAnswer" id="option-${option.key}" 
+                                       value="${option.key}" ${question.userAnswer == option.key ? 'checked' : ''}>
+                            </c:otherwise>
+                        </c:choose>
                         <label for="option-${option.key}" class="option-label">
                             <c:set var="optionText" value="${option.value}" />
                             <c:if test="${fn:startsWith(optionText, option.key) and fn:endsWith(fn:substring(optionText, 0, 2), '.')}">
@@ -246,18 +254,25 @@
     <script>
         // 选项点击效果
         document.querySelectorAll('.option').forEach(option => {
-            option.addEventListener('click', function() {
-                const radio = this.querySelector('input[type="radio"]');
-                if (!radio.disabled) {
-                    radio.checked = true;
+            option.addEventListener('click', function(e) {
+                const input = this.querySelector('input[type="radio"], input[type="checkbox"]');
+                if (!input.disabled) {
+                    // 阻止事件冒泡，避免标签点击和div点击冲突
+                    if (e.target !== input && e.target.tagName !== 'LABEL') {
+                        input.checked = !input.checked;
+                    }
                     
-                    // 移除其他选项的选中状态
-                    document.querySelectorAll('.option').forEach(opt => {
-                        opt.classList.remove('selected');
-                    });
-                    
-                    // 添加当前选项的选中状态
-                    this.classList.add('selected');
+                    if (input.type === 'radio') {
+                        // 单选题：移除其他选项的选中状态
+                        document.querySelectorAll('.option').forEach(opt => {
+                            opt.classList.remove('selected');
+                        });
+                        // 添加当前选项的选中状态
+                        this.classList.add('selected');
+                    } else {
+                        // 多选题：切换当前选项的选中状态
+                        this.classList.toggle('selected', input.checked);
+                    }
                 }
             });
         });
@@ -266,7 +281,37 @@
         document.getElementById('answerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const formData = new FormData(this);
+            // 判断是否为多选题
+            const isMultipleChoice = '${question.type}' === 'multiple';
+            const formData = new FormData();
+            formData.append('questionId', document.querySelector('input[name="questionId"]').value);
+            
+            if (isMultipleChoice) {
+                // 多选题：收集所有选中的选项
+                const selectedOptions = [];
+                document.querySelectorAll('input[name="userAnswers"]:checked').forEach(checkbox => {
+                    selectedOptions.push(checkbox.value);
+                });
+                
+                // 按字母顺序排序并拼接成字符串
+                selectedOptions.sort();
+                formData.append('userAnswer', selectedOptions.join(''));
+                
+                // 检查是否至少选择了一个选项
+                if (selectedOptions.length === 0) {
+                    alert('请至少选择一个选项');
+                    return;
+                }
+            } else {
+                // 单选题和判断题：直接获取选中的值
+                const userAnswer = document.querySelector('input[name="userAnswer"]:checked');
+                if (!userAnswer) {
+                    alert('请选择一个选项');
+                    return;
+                }
+                formData.append('userAnswer', userAnswer.value);
+            }
+            
             const xhr = new XMLHttpRequest();
             
             xhr.open('POST', '/question/submit');
@@ -292,8 +337,8 @@
                         answerInfo.textContent = '正确答案: ' + result.correctAnswer;
                         
                         // 禁用选项和提交按钮
-                        document.querySelectorAll('input[type="radio"]').forEach(radio => {
-                            radio.disabled = true;
+                        document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+                            input.disabled = true;
                         });
                         
                         // 不需要自动重定向，让用户可以查看结果并自行决定下一步操作
@@ -326,8 +371,8 @@
             answerInfo.textContent = '您的答案: <c:out value="${question.userAnswer}" /> | 正确答案: <c:out value="${question.answer}" />';
             
             // 禁用选项
-            document.querySelectorAll('input[type="radio"]').forEach(radio => {
-                radio.disabled = true;
+            document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+                input.disabled = true;
             });
             </script>
         </c:if>
